@@ -12,8 +12,49 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+// MineCell ...
+type MineCell struct {
+	hasMine bool
+	hasFlag bool
+	btn     *widget.Button
+}
+
+func NewCell(btn *widget.Button) MineCell {
+	cell := MineCell{}
+	cell.hasMine = false
+	cell.hasFlag = false
+	return cell
+}
+
+// initGrid ...
+func initGrid() {
+
+}
+
+var buttonGrid [20][20]MineCell
+
 func clickMine(x int, y int) {
 	fmt.Printf("%s:%d:%d\n", "click", x, y)
+	buttonGrid[x][y].btn.SetText("X")
+	buttonGrid[x][y].btn.Disable()
+}
+
+func clickFlag(x int, y int) {
+	fmt.Printf("%s:%d:%d\n", "click", x, y)
+
+	buttonGrid[x][y].btn.SetText("P")
+	buttonGrid[x][y].btn.Disable()
+}
+
+// restart ...
+func restart() {
+
+	for i := 0; i < 20; i++ {
+		for j := 0; j < 20; j++ {
+			buttonGrid[i][j].btn.SetText("")
+			buttonGrid[i][j].btn.Enable()
+		}
+	}
 
 }
 
@@ -21,7 +62,7 @@ func gameScreen(a fyne.App) fyne.CanvasObject {
 
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarSpacer(),
-		widget.NewToolbarAction(theme.RadioButtonCheckedIcon(), func() {}),
+		widget.NewToolbarAction(theme.RadioButtonCheckedIcon(), restart),
 		widget.NewToolbarSpacer(),
 	)
 
@@ -32,7 +73,9 @@ func gameScreen(a fyne.App) fyne.CanvasObject {
 	for i := 0; i < 20; i++ {
 		for j := 0; j < 20; j++ {
 			b := widget.NewButton("", func(i int, j int) func() { return func() { clickMine(i, j) } }(i, j))
+			b.OnSecondaryTapped = func(i int, j int) func() { return func() { clickFlag(i, j) } }(i, j)
 			b.Resize(fyne.NewSize(20, 20))
+			buttonGrid[i][j].btn = b
 			cont.AddObject(b)
 		}
 	}
