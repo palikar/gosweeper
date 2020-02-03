@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/app"
 	"math/rand"
+	 "strconv"
 	// "fyne.io/fyne/canvas"
 	// "image/color"
 	"fyne.io/fyne/layout"
@@ -43,20 +44,25 @@ func initGrid() {
 		}
 	}
 
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 50; i++ {
 		rX := rand.Int31n(20)
 		rY := rand.Int31n(20)
 		buttonGrid[rX][rY].hasMine = true
-		// fmt.Printf("%d:%d\n", r_x, r_y)
-	}
+		}
 
 	for i := 0; i < 20; i++ {
 		for j := 0; j < 20; j++ {
 
+			if buttonGrid[i][j].hasMine {
+				continue
+			}
+			
 			for dX := -1; dX <= 1; dX++ {
+				
 				for dY := -1; dY <= 1; dY++ {
+
 					x := i + dX
-					y := i + dY
+					y := j + dY
 
 					if x >= 20 {
 						continue
@@ -83,21 +89,66 @@ func initGrid() {
 
 }
 
-func clickMine(x int, y int) {
-	fmt.Printf("%s:%d:%d\n", "click", x, y)
-	buttonGrid[x][y].btn.SetText("X")
-	buttonGrid[x][y].btn.Disable()
+func propagate(x int, y int) {
+	if x < 0 || y < 0  || x >= 20 || y >= 20 {
+		return
+	}
 
-	if buttonGrid[x][y].hasMine {
-		fmt.Printf("%s\n", "Boom!")
+	cell := &buttonGrid[x][y]
 
+	if cell.opened || cell.hasMine || cell.hasFlag {
+		return
+	}
+
+	if cell.neighbourMineCount > 0 {
+		cell.btn.SetText(strconv.Itoa(cell.neighbourMineCount))
+		cell.opened = true
+		cell.btn.Disable()
+		return
+	}
+
+	if cell.neighbourMineCount == 0 {
+		cell.opened = true
+		cell.btn.Disable()
+
+		propagate(x, y+1)
+		
+		propagate(x, y-1)
+
+		propagate(x+1, y)
+
+		propagate(x-1, y)
+
+		propagate(x+1, y+1)
+		
+		propagate(x+1, y-1)
+		
+		propagate(x-1, y+1)
+		
+		propagate(x-1, y-1)
+		
 	}
 
 }
 
-func clickFlag(x int, y int) {
+func clickMine(x int, y int) {
 	fmt.Printf("%s:%d:%d\n", "click", x, y)
 
+	if buttonGrid[x][y].hasMine {
+		fmt.Printf("%s\n", "Boom!")
+		return
+	}
+
+	propagate(x,y)
+
+
+
+}
+
+func clickFlag(x int, y int) {
+	fmt.Printf("%s:%d:%d\n", "flag", x, y)
+
+	buttonGrid[x][y].hasFlag = true
 	buttonGrid[x][y].btn.SetText("P")
 	buttonGrid[x][y].btn.Disable()
 }
@@ -131,6 +182,9 @@ func gameScreen(a fyne.App) fyne.CanvasObject {
 			b := widget.NewButton("", func(i int, j int) func() { return func() { clickMine(i, j) } }(i, j))
 			b.OnSecondaryTapped = func(i int, j int) func() { return func() { clickFlag(i, j) } }(i, j)
 			b.Resize(fyne.NewSize(20, 20))
+
+			// b.SetText(strconv.Itoa(buttonGrid[i][j].neighbourMineCount))
+			
 			buttonGrid[i][j].btn = b
 			cont.AddObject(b)
 		}
