@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"time"
 	"fyne.io/fyne"
 
 	"fyne.io/fyne/app"
 	"math/rand"
-	 "strconv"
+	"strconv"
 	// "fyne.io/fyne/canvas"
 	// "image/color"
 	"fyne.io/fyne/layout"
@@ -38,15 +39,28 @@ func NewCell(btn *widget.Button) MineCell {
 // initGrid ...
 func initGrid() {
 
+	s1 := rand.NewSource(time.Now().UnixNano())
+    r1 := rand.New(s1)
+	
 	for i := 0; i < 20; i++ {
 		for j := 0; j < 20; j++ {
+
+			if buttonGrid[i][j].btn != nil {
+				p := buttonGrid[i][j].btn
+				p.Enable()
+				p.SetText("")
+				buttonGrid[i][j] = NewCell(nil)
+				buttonGrid[i][j].btn = p
+				continue
+			}
+			
 			buttonGrid[i][j] = NewCell(nil)
 		}
 	}
 
-	for i := 0; i < 50; i++ {
-		rX := rand.Int31n(20)
-		rY := rand.Int31n(20)
+	for i := 0; i < 70; i++ {
+		rX := r1.Int31n(20)
+		rY := r1.Int31n(20)
 		buttonGrid[rX][rY].hasMine = true
 		}
 
@@ -132,8 +146,6 @@ func propagate(x int, y int) {
 }
 
 func clickMine(x int, y int) {
-	fmt.Printf("%s:%d:%d\n", "click", x, y)
-
 	if buttonGrid[x][y].hasMine {
 		fmt.Printf("%s\n", "Boom!")
 		return
@@ -156,12 +168,7 @@ func clickFlag(x int, y int) {
 // restart ...
 func restart() {
 
-	for i := 0; i < 20; i++ {
-		for j := 0; j < 20; j++ {
-			buttonGrid[i][j].btn.SetText("")
-			buttonGrid[i][j].btn.Enable()
-		}
-	}
+	initGrid()
 
 }
 
