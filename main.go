@@ -28,10 +28,17 @@ type MineCell struct {
 
 var buttonGrid [][]MineCell
 
-var width = 30
-var height = 30
+var width = 16
+var height = 16
 var minesInit = false
-var minesCnt = 140
+var minesCnt = 40
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
 
 // NewCell ...
 func NewCell(btn *widget.Button) MineCell {
@@ -46,13 +53,12 @@ func NewCell(btn *widget.Button) MineCell {
 // initGrid ...
 func initGrid() {
 
+	minesInit = false
+
 	buttonGrid = make([][]MineCell, width)
 	for i := 0; i < width; i++ {
 		buttonGrid[i] = make([]MineCell, height)
 	}
-
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
 
 	for i := 0; i < width; i++ {
 		for j := 0; j < height; j++ {
@@ -70,14 +76,24 @@ func initGrid() {
 		}
 	}
 
+}
+
+// initMines ...
+func initMines(xClick int, yClick int) {
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+
 	for i := 0; i < minesCnt; i++ {
 		rX := r1.Int31n(int32(width))
 		rY := r1.Int31n(int32(height))
 
-		for buttonGrid[rX][rY].hasMine {
+		for buttonGrid[rX][rY].hasMine ||
+			(abs(xClick-int(rX)) < 2 && abs(yClick-int(rY)) < 2) {
 			rX = r1.Int31n(int32(width))
 			rY = r1.Int31n(int32(height))
 		}
+
 		buttonGrid[rX][rY].hasMine = true
 
 	}
@@ -118,6 +134,33 @@ func initGrid() {
 		}
 
 	}
+
+}
+
+// checkWin ...
+func checkWin() {
+
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
+			ch := &buttonGrid[i][j]
+			if !ch.hasMine && !ch.opened {
+				return
+			}
+		}
+	}
+
+	cnf := dialog.NewConfirm("You won", "You must be very clever, bubence! One more game", func(suc bool) {
+		if !suc {
+			a.Quit()
+			os.Exit(0)
+		}
+		initGrid()
+		resetUI()
+
+	}, w)
+	cnf.SetConfirmText("Oh Yes!")
+	cnf.SetDismissText("Nah")
+	cnf.Show()
 
 }
 
@@ -164,6 +207,12 @@ func propagate(x int, y int) {
 }
 
 func clickMine(x int, y int) {
+
+	if !minesInit {
+		initMines(x, y)
+		minesInit = true
+	}
+
 	if buttonGrid[x][y].hasMine {
 
 		cnf := dialog.NewConfirm("Game Over", "You clicked on mine. Do you want a new game?", func(suc bool) {
@@ -183,6 +232,8 @@ func clickMine(x int, y int) {
 	}
 
 	propagate(x, y)
+
+	checkWin()
 
 }
 
@@ -277,11 +328,11 @@ func main() {
 					resetUI()
 				}),
 
-			fyne.NewMenuItem("New Game (16x30)",
+			fyne.NewMenuItem("New Game (30x30)",
 				func() {
 					width = 30
 					height = 30
-					minesCnt = 99
+					minesCnt = 120
 					initGrid()
 					w.Resize(fyne.NewSize(1000, 1000))
 					resetUI()
