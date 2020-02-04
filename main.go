@@ -24,7 +24,13 @@ type MineCell struct {
 	btn                *widget.Button
 }
 
-var buttonGrid [20][20]MineCell
+var buttonGrid [][]MineCell
+
+var width = 20
+var height = 20
+var minesInit = false
+
+var minesCnt = 50
 
 // NewCell ...
 func NewCell(btn *widget.Button) MineCell {
@@ -39,11 +45,16 @@ func NewCell(btn *widget.Button) MineCell {
 // initGrid ...
 func initGrid() {
 
-	s1 := rand.NewSource(time.Now().UnixNano())
-    r1 := rand.New(s1)
+	buttonGrid = make([][]MineCell, height)
+	for i:=0;i<height;i++ {
+		buttonGrid[i] = make([]MineCell, width)
+	}
 	
-	for i := 0; i < 20; i++ {
-		for j := 0; j < 20; j++ {
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
 
 			if buttonGrid[i][j].btn != nil {
 				p := buttonGrid[i][j].btn
@@ -58,14 +69,14 @@ func initGrid() {
 		}
 	}
 
-	for i := 0; i < 70; i++ {
-		rX := r1.Int31n(20)
-		rY := r1.Int31n(20)
+	for i := 0; i < minesCnt; i++ {
+		rX := r1.Int31n(int32(width))
+		rY := r1.Int31n(int32(height))
 		buttonGrid[rX][rY].hasMine = true
-		}
+	}
 
-	for i := 0; i < 20; i++ {
-		for j := 0; j < 20; j++ {
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
 
 			if buttonGrid[i][j].hasMine {
 				continue
@@ -78,10 +89,10 @@ func initGrid() {
 					x := i + dX
 					y := j + dY
 
-					if x >= 20 {
+					if x >= width {
 						continue
 					}
-					if y >= 20 {
+					if y >= height {
 						continue
 					}
 					if x < 0 {
@@ -104,7 +115,7 @@ func initGrid() {
 }
 
 func propagate(x int, y int) {
-	if x < 0 || y < 0  || x >= 20 || y >= 20 {
+	if x < 0 || y < 0  || x >= width || y >= height {
 		return
 	}
 
@@ -158,11 +169,15 @@ func clickMine(x int, y int) {
 }
 
 func clickFlag(x int, y int) {
-	fmt.Printf("%s:%d:%d\n", "flag", x, y)
 
+	if buttonGrid[x][y].hasFlag {
+		buttonGrid[x][y].hasFlag = false
+		buttonGrid[x][y].btn.SetText("")
+		return
+	}
+	
 	buttonGrid[x][y].hasFlag = true
-	buttonGrid[x][y].btn.SetText("P")
-	buttonGrid[x][y].btn.Disable()
+	buttonGrid[x][y].btn.SetText("P")	
 }
 
 // restart ...
