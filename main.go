@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"fyne.io/fyne"
+	"os"
+	"time"
 
 	"fyne.io/fyne/app"
 	"math/rand"
 	"strconv"
 	// "fyne.io/fyne/canvas"
 	// "image/color"
+	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -26,11 +28,10 @@ type MineCell struct {
 
 var buttonGrid [][]MineCell
 
-var width = 20
-var height = 20
+var width = 30
+var height = 30
 var minesInit = false
-
-var minesCnt = 50
+var minesCnt = 140
 
 // NewCell ...
 func NewCell(btn *widget.Button) MineCell {
@@ -45,11 +46,11 @@ func NewCell(btn *widget.Button) MineCell {
 // initGrid ...
 func initGrid() {
 
-	buttonGrid = make([][]MineCell, height)
-	for i:=0;i<height;i++ {
-		buttonGrid[i] = make([]MineCell, width)
+	buttonGrid = make([][]MineCell, width)
+	for i := 0; i < width; i++ {
+		buttonGrid[i] = make([]MineCell, height)
 	}
-	
+
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 
@@ -64,7 +65,7 @@ func initGrid() {
 				buttonGrid[i][j].btn = p
 				continue
 			}
-			
+
 			buttonGrid[i][j] = NewCell(nil)
 		}
 	}
@@ -72,7 +73,13 @@ func initGrid() {
 	for i := 0; i < minesCnt; i++ {
 		rX := r1.Int31n(int32(width))
 		rY := r1.Int31n(int32(height))
+
+		for buttonGrid[rX][rY].hasMine {
+			rX = r1.Int31n(int32(width))
+			rY = r1.Int31n(int32(height))
+		}
 		buttonGrid[rX][rY].hasMine = true
+
 	}
 
 	for i := 0; i < width; i++ {
@@ -81,9 +88,9 @@ func initGrid() {
 			if buttonGrid[i][j].hasMine {
 				continue
 			}
-			
+
 			for dX := -1; dX <= 1; dX++ {
-				
+
 				for dY := -1; dY <= 1; dY++ {
 
 					x := i + dX
@@ -115,7 +122,7 @@ func initGrid() {
 }
 
 func propagate(x int, y int) {
-	if x < 0 || y < 0  || x >= width || y >= height {
+	if x < 0 || y < 0 || x >= width || y >= height {
 		return
 	}
 
@@ -137,7 +144,7 @@ func propagate(x int, y int) {
 		cell.btn.Disable()
 
 		propagate(x, y+1)
-		
+
 		propagate(x, y-1)
 
 		propagate(x+1, y)
@@ -145,26 +152,37 @@ func propagate(x int, y int) {
 		propagate(x-1, y)
 
 		propagate(x+1, y+1)
-		
+
 		propagate(x+1, y-1)
-		
+
 		propagate(x-1, y+1)
-		
+
 		propagate(x-1, y-1)
-		
+
 	}
 
 }
 
 func clickMine(x int, y int) {
 	if buttonGrid[x][y].hasMine {
-		fmt.Printf("%s\n", "Boom!")
+
+		cnf := dialog.NewConfirm("Game Over", "You clicked on mine. Do you want a new game?", func(suc bool) {
+			if !suc {
+				a.Quit()
+				os.Exit(0)
+			}
+			initGrid()
+			resetUI()
+
+		}, w)
+		cnf.SetConfirmText("Oh Yes!")
+		cnf.SetDismissText("Nah")
+		cnf.Show()
+
 		return
 	}
 
-	propagate(x,y)
-
-
+	propagate(x, y)
 
 }
 
@@ -175,16 +193,15 @@ func clickFlag(x int, y int) {
 		buttonGrid[x][y].btn.SetText("")
 		return
 	}
-	
+
 	buttonGrid[x][y].hasFlag = true
-	buttonGrid[x][y].btn.SetText("P")	
+	buttonGrid[x][y].btn.SetText("P")
 }
 
 // restart ...
 func restart() {
-
 	initGrid()
-
+	resetUI()
 }
 
 func gameScreen(a fyne.App) fyne.CanvasObject {
@@ -195,18 +212,18 @@ func gameScreen(a fyne.App) fyne.CanvasObject {
 		widget.NewToolbarSpacer(),
 	)
 
-	grid := layout.NewGridLayout(20)
+	grid := layout.NewGridLayout(width)
 
 	cont := fyne.NewContainerWithLayout(grid)
 
-	for i := 0; i < 20; i++ {
-		for j := 0; j < 20; j++ {
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
 			b := widget.NewButton("", func(i int, j int) func() { return func() { clickMine(i, j) } }(i, j))
 			b.OnSecondaryTapped = func(i int, j int) func() { return func() { clickFlag(i, j) } }(i, j)
-			b.Resize(fyne.NewSize(20, 20))
+			b.Resize(fyne.NewSize(30, 30))
 
 			// b.SetText(strconv.Itoa(buttonGrid[i][j].neighbourMineCount))
-			
+
 			buttonGrid[i][j].btn = b
 			cont.AddObject(b)
 		}
@@ -218,19 +235,71 @@ func gameScreen(a fyne.App) fyne.CanvasObject {
 	return content
 }
 
-func main() {
-	fmt.Println("Starting The Game")
-	initGrid()
+var a = app.NewWithID("palikar.go.sweeper")
+var w = a.NewWindow("GoSweeper")
 
-	a := app.NewWithID("palikar.go.sweeper")
-	a.SetIcon(theme.FyneLogo())
-	w := a.NewWindow("GoSweeper")
+// resetUI ...
+func resetUI() {
 
 	tabs := widget.NewTabContainer(widget.NewTabItemWithIcon("Game", theme.HomeIcon(), gameScreen(a)))
 	tabs.SetTabLocation(widget.TabLocationLeading)
-
-	w.Resize(fyne.NewSize(750, 750))
-
 	w.SetContent(tabs)
+
+}
+
+func main() {
+
+	fmt.Println("Starting The Game")
+	initGrid()
+
+	a.SetIcon(theme.FyneLogo())
+
+	w.SetMainMenu(fyne.NewMainMenu(
+		fyne.NewMenu("Game",
+
+			fyne.NewMenuItem("New Game (9x9)",
+				func() {
+					width = 9
+					height = 9
+					minesCnt = 10
+					initGrid()
+					w.Resize(fyne.NewSize(300, 300))
+					resetUI()
+				}),
+
+			fyne.NewMenuItem("New Game (16x16)",
+				func() {
+					width = 16
+					height = 16
+					minesCnt = 40
+					initGrid()
+					w.Resize(fyne.NewSize(600, 600))
+					resetUI()
+				}),
+
+			fyne.NewMenuItem("New Game (16x30)",
+				func() {
+					width = 30
+					height = 30
+					minesCnt = 99
+					initGrid()
+					w.Resize(fyne.NewSize(1000, 1000))
+					resetUI()
+				})),
+
+		fyne.NewMenu("Info",
+			fyne.NewMenuItem("About",
+				func() {
+
+				}),
+			fyne.NewMenuItem("License",
+				func() {
+
+				}))))
+
+	resetUI()
+
+	w.Resize(fyne.NewSize(1000, 1000))
+
 	w.ShowAndRun()
 }
