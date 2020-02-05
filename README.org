@@ -18,8 +18,6 @@
 
 * Gosweeper
 
-
-
 This is a very simple rip off of [[https://en.wikipedia.org/wiki/Minesweeper_(video_game)][Minesweeper]] written in Go. This is my first "project" in Go and it was meant to teach me the basics of the language. The [[https://github.com/fyne-io/fyne][Fyne]] library is used for the graphical parts. It doesn't perform as optimally as I would like it too, but it gets the job done.
 
 \\
@@ -47,4 +45,10 @@ Here are couple of screenshots:
 The game is written very ugly. In my defense, I just wanted to get going with Go. I now know what ugly code in Go looks like. When you write a bad program, it becomes really obvious what can be done better and in what way. Hopefully, my next project will be prettier.
 
 ** Installation
+The project is "go get"-able. To install the binary that is the game, just execute:
 
+#+BEGIN_SRC sh
+go get github.com/palikar/gosweeper/cmd/gosweeper
+#+END_SRC
+
+This should do the trick for any Linux based system. I have not yet tested the game on Windows or Mac OS.

@@ -30,3 +30,11 @@ The game is written very ugly. In my defense, I just wanted to get going with Go
 
 
 ## Installation
+
+The project is &ldquo;go get&rdquo;-able. To install the binary that is the game, just execute:
+
+```sh
+go get github.com/palikar/gosweeper/cmd/gosweeper
+```
+
+This should do the trick for any Linux based system. I have not yet tested the game on Windows or Mac OS.
