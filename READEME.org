@@ -1,0 +1,50 @@
+#+options: ':t *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK")
+#+options: date:t e:t email:nil f:t inline:t num:t p:nil pri:nil
+#+options: prop:nil stat:t tags:t tasks:t tex:t timestamp:t title:t
+#+options: toc:t todo:t |:t
+#+title: READEME
+#+date: <2020-02-05 Wed>
+#+author: Stanislav Arnaudov
+#+email: stanislav.arn@gmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 26.3 (Org mode 9.3.2)
+
+
+
+[[./res/big.png]]
+
+* Gosweeper
+
+
+
+This is a very simple rip off of [[https://en.wikipedia.org/wiki/Minesweeper_(video_game)][Minesweeper]] written in Go. This is my first "project" in Go and it was meant to teach me the basics of the language. The [[https://github.com/fyne-io/fyne][Fyne]] library is used for the graphical parts. It doesn't perform as optimally as I would like it too, but it gets the job done.
+
+\\
+
+
+The controls are as in the original game. The one caveat is that the middle click is not supported. In the =Game= menu, the player can choose the board size. Currently only the following boards are supported:
+
+- size 9x9 (10 mines)
+- size 16x16 (40 mines)
+- size 30x30 (120 mines)
+
+Flags are marked with "P".
+
+\\
+
+Here are couple of screenshots:
+
+[[./res/small.png]]
+
+[[./res/medium.png]]
+
+
+
+** Code
+The game is written very ugly. In my defense, I just wanted to get going with Go. I now know what ugly code in Go looks like. When you write a bad program, it becomes really obvious what can be done better and in what way. Hopefully, my next project will be prettier.
+
+** Installation
+
