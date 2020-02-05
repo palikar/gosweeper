@@ -2,7 +2,7 @@
 #+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK")
 #+options: date:t e:t email:nil f:t inline:t num:t p:nil pri:nil
 #+options: prop:nil stat:t tags:t tasks:t tex:t timestamp:t title:t
-#+options: toc:t todo:t |:t
+#+options: toc:nil todo:t |:t
 #+title: READEME
 #+date: <2020-02-05 Wed>
 #+author: Stanislav Arnaudov
@@ -31,7 +31,7 @@ The controls are as in the original game. The one caveat is that the middle clic
 - size 16x16 (40 mines)
 - size 30x30 (120 mines)
 
-Flags are marked with "P".
+Flags are marked with "P". You can also restart the game by clicking the dot near the to bar.
 
 \\
 

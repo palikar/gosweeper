@@ -1,11 +1,5 @@
-- [Gosweeper](#org9858b1f)
-  - [Code](#org868c6d8)
-  - [Installation](#org9b257b1)
-
 ![img](./res/big.png)
 
-
-<a id="org9858b1f"></a>
 
 # Gosweeper
 
@@ -19,7 +13,7 @@ The controls are as in the original game. The one caveat is that the middle clic
 -   size 16x16 (40 mines)
 -   size 30x30 (120 mines)
 
-Flags are marked with &ldquo;P&rdquo;.
+Flags are marked with &ldquo;P&rdquo;. You can also restart the game by clicking the dot near the to bar.
 
 
 
@@ -30,13 +24,9 @@ Here are couple of screenshots:
 ![img](./res/medium.png)
 
 
-<a id="org868c6d8"></a>
-
 ## Code
 
 The game is written very ugly. In my defense, I just wanted to get going with Go. I now know what ugly code in Go looks like. When you write a bad program, it becomes really obvious what can be done better and in what way. Hopefully, my next project will be prettier.
 
-
-<a id="org9b257b1"></a>
 
 ## Installation
